@@ -6,12 +6,17 @@ import (
 	ninf "github.com/vince15dk/k8s-operator-nhncloud/pkg/client/informers/externalversions/nhncloud.com/v1beta1"
 	nlister "github.com/vince15dk/k8s-operator-nhncloud/pkg/client/listers/nhncloud.com/v1beta1"
 	"github.com/vince15dk/k8s-operator-nhncloud/pkg/model"
+	"github.com/vince15dk/k8s-operator-nhncloud/pkg/rest"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 	"log"
 	"time"
+)
+
+var (
+	secretName = "nhn-token"
 )
 
 type Controller struct {
@@ -83,10 +88,11 @@ func (c *Controller) processNextItem() bool {
 		}
 		instance.Spec.ImageRef = model.Images[instance.Spec.ImageRef]
 		instance.Spec.FlavorRef = model.Flavors[instance.Spec.FlavorRef]
-		for _, v := range instance.Spec.BlockDeviceMappingV2{
-			v.UUID = instance.Spec.ImageRef
+		for i :=0;i<len(instance.Spec.BlockDeviceMappingV2);i++{
+			instance.Spec.BlockDeviceMappingV2[i].UUID = instance.Spec.ImageRef
 		}
-		log.Printf("instance spec that we have it %+v\n", instance.Spec)
+		rest.CreateInstance(c.client, instance, ns, secretName)
+		//log.Printf("instance spec that we have it %+v\n", instance.Spec)
 	case "delete":
 		fmt.Println("delete state")
 	case "update":

@@ -31,7 +31,7 @@ type InstanceSpec struct {
 
 type BlockDevice struct {
 	UUID                string `json:"uuid,omitempty"`
-	BootIndex           int    `json:"boot_index,omitempty"`
+	BootIndex           *int    `json:"boot_index,omitempty"`
 	VolumeSize          int    `json:"volume_size,omitempty"`
 	DeviceName          string `json:"device_name,omitempty"`
 	SourceType          string `json:"source_type,omitempty"`

@@ -4,16 +4,16 @@ metadata:
   name: ubuntu-vm
 spec:
   flavorRef: "m2.c2m4"
-  imageRef: "Ubuntu-18.04"
+  imageRef: "Ubuntu-20.04"
   key_name: "k8s"
   min_count: 3
   name: ubuntu-vm
   networks:
   - subnet: "bb9d5998-abb2-47ae-8144-8137fb06b0ec"
   block_device_mapping_v2:
-  - boot_index: 0
-    delete_on_termination: 1
-    destination_type: "volume"
-    device_name: "vda"
-    source_type: "image"
-    volume_size: 30
+    - delete_on_termination: 1
+      destination_type: "volume"
+      device_name: "vda"
+      source_type: "image"
+      volume_size: 30
+      boot_index: 0
