@@ -16,7 +16,14 @@ spec:
     singular: instance
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - jsonPath: .status.instanceID
+      name: InstanceID
+      type: string
+    - jsonPath: .status.progress
+      name: Progress
+      type: string
+    name: v1beta1
     schema:
       openAPIV3Schema:
         properties:
