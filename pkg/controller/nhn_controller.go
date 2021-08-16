@@ -1,12 +1,15 @@
 package controller
 
 import (
+	"context"
 	"fmt"
+	"github.com/vince15dk/k8s-operator-nhncloud/pkg/apis/nhncloud.com/v1beta1"
 	nhnClientSet "github.com/vince15dk/k8s-operator-nhncloud/pkg/client/clientset/versioned"
 	ninf "github.com/vince15dk/k8s-operator-nhncloud/pkg/client/informers/externalversions/nhncloud.com/v1beta1"
 	nlister "github.com/vince15dk/k8s-operator-nhncloud/pkg/client/listers/nhncloud.com/v1beta1"
 	"github.com/vince15dk/k8s-operator-nhncloud/pkg/model"
 	"github.com/vince15dk/k8s-operator-nhncloud/pkg/rest"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -94,13 +97,26 @@ func (c *Controller) processNextItem() bool {
 		}
 		rest.CreateInstance(c.client, instance, ns, secretName)
 		//log.Printf("instance spec that we have it %+v\n", instance.Spec)
+		err = c.updateStatus("", "", instance)
+		if err != nil{
+			log.Printf("error %s, updating status of the instance %s\n", err.Error(), instance.Name)
+		}
 	case "delete":
 		fmt.Println("delete state")
 	case "update":
 		fmt.Println("update state")
 	}
-	//InstanceID, err := do.Create(c.client, instance.Spec)
+
+
+
 	return true
+}
+
+func (c *Controller)updateStatus(id, progress string, instance *v1beta1.Instance)error{
+	instance.Status.InstanceID = id
+	instance.Status.Progress = progress
+	_, err := c.nhnClient.NhncloudV1beta1().Instances(instance.Namespace).UpdateStatus(context.Background(), instance, metav1.UpdateOptions{})
+	return err
 }
 
 func (c *Controller) handleAdd(obj interface{}) {
