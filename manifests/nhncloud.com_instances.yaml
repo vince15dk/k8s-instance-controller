@@ -14,8 +14,6 @@ spec:
     listKind: InstanceList
     plural: instances
     singular: instance
-    shortNames:
-     - inst
   scope: Namespaced
   versions:
   - name: v1beta1
@@ -73,23 +71,21 @@ spec:
                   type: object
                 type: array
             type: object
+          status:
+            properties:
+              instanceID:
+                type: string
+              progress:
+                type: string
+            type: object
         type: object
     served: true
     storage: true
-    additionalPrinterColumns:
-      - name: imageref
-        type: string
-        description: nhn cloud imageid
-        jsonPath: .spec.imageRef
-      - name: flavor
-        type: string
-        description: The flavor type
-        jsonPath: .spec.flavorRef
-      - name: blocksize
-        type: integer
-        description: The volume size
-        jsonPath: .spec.block_device_mapping_v2[0].volume_size
-      - name: count
-        type: integer
-        description: The instance count
-        jsonPath: .spec.min_count
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

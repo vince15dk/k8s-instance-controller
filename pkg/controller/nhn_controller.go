@@ -54,6 +54,7 @@ func (c *Controller) Run(ch chan struct{}) error {
 	go wait.Until(c.worker, time.Second, ch)
 
 	<-ch
+
 	return nil
 }
 
