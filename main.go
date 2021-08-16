@@ -37,7 +37,7 @@ func main(){
 	}
 
 	// period of re-sync by calling UpdateFunc of the event handler
-	infoFactory := nInfFac.NewSharedInformerFactory(nhnClientSet, 20 * time.Minute)
+	infoFactory := nInfFac.NewSharedInformerFactory(nhnClientSet, 30 * time.Second)
 	ch := make(chan struct{})
 	c := controller.NewController(client, nhnClientSet, infoFactory.Nhncloud().V1beta1().Instances())
 

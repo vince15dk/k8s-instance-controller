@@ -46,3 +46,23 @@ func PostHandleFunc(url string, body interface{}, headers http.Header)(*http.Res
 	client := http.Client{}
 	return client.Do(request)
 }
+
+func ListHandleFunc(url string, headers http.Header)(*http.Response, error){
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil{
+		return nil, err
+	}
+	request.Header = headers
+	client := http.Client{}
+	return client.Do(request)
+}
+
+func DeleteHandleFunc(url string, headers http.Header)(*http.Response, error){
+	request, err := http.NewRequest(http.MethodDelete, url, nil)
+	if err != nil{
+		return nil, err
+	}
+	request.Header = headers
+	client := http.Client{}
+	return client.Do(request)
+}

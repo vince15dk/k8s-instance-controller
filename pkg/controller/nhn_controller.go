@@ -101,13 +101,16 @@ func (c *Controller) processNextItem() bool {
 		if err != nil{
 			log.Printf("error %s, updating status of the instance %s\n", err.Error(), instance.Name)
 		}
+
 	case "delete":
-		fmt.Println("delete state")
+		fmt.Println("Delete...")
+		rest.DeleteInstance(c.client, item.(*v1beta1.Instance),ns,secretName)
 	case "update":
 		fmt.Println("update state")
+		fmt.Println(item.(*v1beta1.Instance))
+		fmt.Println(ns, name)
+		//rest.ValidateInstance(c.client, item.(*v1beta1.Instance),ns, secretName)
 	}
-
-
 
 	return true
 }
@@ -132,6 +135,7 @@ func (c *Controller) handleDelete(obj interface{}) {
 }
 
 func (c *Controller) handleUpdate(old interface{}, obj interface{}) {
-	c.state = "update"
 	log.Println("handleUpdate was called")
+	c.state = "update"
+	c.wq.Add(obj)
 }
