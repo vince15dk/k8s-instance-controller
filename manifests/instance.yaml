@@ -6,10 +6,10 @@ spec:
   flavorRef: "m2.c2m4"
   imageRef: "Ubuntu-20.04"
   key_name: "k8s"
-  min_count: 3
+  min_count: 2
   name: ubuntu_vm
   networks:
-  - subnet: "bb9d5998-abb2-47ae-8144-8137fb06b0ec"
+  - subnet: "0441c2ea-4c9d-4e89-820e-a91311ceca37"
   block_device_mapping_v2:
     - delete_on_termination: 1
       destination_type: "volume"

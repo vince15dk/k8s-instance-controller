@@ -76,7 +76,7 @@ func (c *Clientset) Tracker() testing.ObjectTracker {
 
 var (
 	_ clientset.Interface = &Clientset{}
-	_ testing.FakeClient  = &Clientset{}
+	//_ testing.FakeClient  = &Clientset{}
 )
 
 // NhncloudV1beta1 retrieves the NhncloudV1beta1Client
