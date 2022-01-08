@@ -6,6 +6,7 @@ import (
 	nInfFac "github.com/vince15dk/k8s-operator-nhncloud/pkg/client/informers/externalversions"
 	"github.com/vince15dk/k8s-operator-nhncloud/pkg/controller"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	"log"
@@ -22,8 +23,12 @@ func main(){
 	}
 	flag.Parse()
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil{
-		log.Printf("Building ocnfig from flags, %s", err.Error())
+	if err != nil {
+		log.Printf("Building config from flags, %s", err.Error())
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			log.Printf("error %s, getting inclusterconfig", err.Error())
+		}
 	}
 
 	nhnClientSet, err := nhnClient.NewForConfig(config)
