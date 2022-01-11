@@ -125,17 +125,21 @@ func (c *Controller)updateStatus(id, progress string, instance *v1beta1.Instance
 func (c *Controller) handleAdd(obj interface{}) {
 	log.Println("handleAdd was called")
 	c.state = "create"
-	c.wq.Add(obj)
+	c.wq.AddAfter(obj, time.Second * 2)
 }
 
 func (c *Controller) handleDelete(obj interface{}) {
 	log.Println("handleDelete was called")
 	c.state = "delete"
-	c.wq.Add(obj)
+	c.wq.AddAfter(obj, time.Second * 2)
 }
 
 func (c *Controller) handleUpdate(old interface{}, obj interface{}) {
 	log.Println("handleUpdate was called")
 	c.state = "update"
-	c.wq.Add(obj)
+	s := [2]interface{}{
+		old,
+		new,
+	}
+	c.wq.AddRateLimited(s)
 }

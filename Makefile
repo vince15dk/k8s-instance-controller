@@ -18,14 +18,14 @@ docker-build:
 	docker build \
 		-f Dockerfile \
 		-t b65b0111-kr1-registry.container.cloud.toast.com/k8s-operator-instances:$(version) \
-		--build-arg PACKAGE_NAME=sales-api \
+		--build-arg PACKAGE_NAME=k8s-operator-instances \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 		.
 # ==============================================================================
 
 docker-push:
-	docker push b65b0111-kr1-registry.container.cloud.toast.com/sales-api-amd64:$(version)
+	docker push b65b0111-kr1-registry.container.cloud.toast.com/k8s-operator-instances:$(version)
 
 run:
 	go run main.go
