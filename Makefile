@@ -12,14 +12,12 @@ SHELL := /bin/bash
 
 VERSION := 1.0
 
-all: sales-api
+all: docker-build docker-push
 
-deploy: sales-api docker-push k8s-deploy
-
-sales-api:
+docker-build:
 	docker build \
-		-f zarf/docker/Dockerfile.sales-api \
-		-t b65b0111-kr1-registry.container.cloud.toast.com/sales-api-amd64:$(version) \
+		-f Dockerfile \
+		-t b65b0111-kr1-registry.container.cloud.toast.com/k8s-operator-instances:$(version) \
 		--build-arg PACKAGE_NAME=sales-api \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
@@ -29,14 +27,8 @@ sales-api:
 docker-push:
 	docker push b65b0111-kr1-registry.container.cloud.toast.com/sales-api-amd64:$(version)
 
-k8s-deploy:
-	./zarf/k8s/deploy/deploy.sh $(version)
-
 run:
 	go run main.go
-
-admin:
-	go run app/tooling/admin/main.go
 
 tidy:
 	go mod tidy
@@ -45,9 +37,6 @@ tidy:
 test:
 	go test -v ./... -count=1
 	#staticcheck ./...
-
-logs:
-	kubectl logs -l app=sales-api -n myservice3 --all-containers=true -f --tail=100 | go run app/tooling/logfmt/main.go
 
 push:
 	git add -A
