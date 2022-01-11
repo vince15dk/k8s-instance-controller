@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/vince15dk/k8s-operator-nhncloud/pkg/apis/nhncloud.com/v1beta1"
 	nhnClientSet "github.com/vince15dk/k8s-operator-nhncloud/pkg/client/clientset/versioned"
@@ -73,7 +74,21 @@ func (c *Controller) processNextItem() bool {
 		return false
 	}
 
+	defer c.wq.Done(item)
 	defer c.wq.Forget(item)
+
+	if c.state == "update"{
+		updateItem, ok := item.([2]interface{})
+		if !ok {
+			log.Printf("error %s", errors.New("item can not be converted"))
+			return false
+		}
+		// get namespace and name of a new obj from que
+		_ = updateItem[1].(*v1beta1.Instance).Namespace
+		_ = updateItem[1].(*v1beta1.Instance).Name
+
+	}
+
 	key, err := cache.MetaNamespaceKeyFunc(item)
 	if err != nil {
 		log.Printf("error %s called Namespace key func on cache for item", err.Error())
@@ -134,7 +149,7 @@ func (c *Controller) handleDelete(obj interface{}) {
 	c.wq.AddAfter(obj, time.Second * 2)
 }
 
-func (c *Controller) handleUpdate(old interface{}, obj interface{}) {
+func (c *Controller) handleUpdate(old interface{}, new interface{}) {
 	log.Println("handleUpdate was called")
 	c.state = "update"
 	s := [2]interface{}{
