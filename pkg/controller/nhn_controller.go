@@ -77,18 +77,6 @@ func (c *Controller) processNextItem() bool {
 	defer c.wq.Done(item)
 	defer c.wq.Forget(item)
 
-	if c.state == "update"{
-		updateItem, ok := item.([2]interface{})
-		if !ok {
-			log.Printf("error %s", errors.New("item can not be converted"))
-			return false
-		}
-		// get namespace and name of a new obj from que
-		_ = updateItem[1].(*v1beta1.Instance).Namespace
-		_ = updateItem[1].(*v1beta1.Instance).Name
-
-	}
-
 	key, err := cache.MetaNamespaceKeyFunc(item)
 	if err != nil {
 		log.Printf("error %s called Namespace key func on cache for item", err.Error())
@@ -121,10 +109,15 @@ func (c *Controller) processNextItem() bool {
 		fmt.Println("Delete...")
 		rest.DeleteInstance(c.client, item.(*v1beta1.Instance),ns,secretName)
 	case "update":
-		fmt.Println("update state")
-		fmt.Println(item.(*v1beta1.Instance))
-		fmt.Println(ns, name)
+		fmt.Println("Update state...")
 		//rest.ValidateInstance(c.client, item.(*v1beta1.Instance),ns, secretName)
+		updateItem, ok := item.([2]interface{})
+		if !ok {
+			log.Printf("error %s", errors.New("item can not be converted"))
+			return false
+		}
+		// get namespace and name of a new obj from que
+		rest.ListInstance(c.client, item.(*v1beta1.Instance), updateItem[1].(*v1beta1.Instance).Namespace, secretName)
 	}
 
 	return true

@@ -75,3 +75,7 @@ type InstanceList struct {
 		TenantID                         string        `json:"tenant_id"`
 	} `json:"servers"`
 }
+
+type Subnet struct {
+	Subnet string `json:"subnet"`
+}

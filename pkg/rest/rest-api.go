@@ -37,6 +37,22 @@ func getSecret(client kubernetes.Interface, namespace, name string) (*Secret, er
 	return secret, nil
 }
 
+func AddToBodyInstance(a *model.Instance, b *v1beta1.Instance){
+	a.Server.Name = b.Spec.Name
+	a.Server.ImageRef = model.Images[b.Spec.ImageRef]
+	a.Server.FlavorRef = model.Flavors[b.Spec.FlavorRef]
+	a.Server.Networks = b.Spec.Networks
+	a.Server.KeyName = b.Spec.KeyName
+	a.Server.MinCount = b.Spec.MinCount
+	a.Server.BlockDeviceMappingV2 = b.Spec.BlockDeviceMappingV2
+	a.Server.BlockDeviceMappingV2[0].UUID = model.Images[b.Spec.ImageRef]
+	a.Server.BlockDeviceMappingV2[0].DeviceName = "vda"
+	a.Server.BlockDeviceMappingV2[0].SourceType = "image"
+	a.Server.BlockDeviceMappingV2[0].DestinationType = "volume"
+	a.Server.BlockDeviceMappingV2[0].DeleteOnTermination = 1
+}
+
+
 func CreateInstance(client kubernetes.Interface, instance *v1beta1.Instance, namespace, name string) {
 	s, err := getSecret(client, namespace, name)
 	if err != nil {
@@ -105,6 +121,80 @@ func DeleteInstance(client kubernetes.Interface, instance *v1beta1.Instance, nam
 		if err != nil{
 		}
 	}
+}
+
+func ListInstance(client kubernetes.Interface, instance *v1beta1.Instance, namespace, name string){
+	secret, err := getSecret(client, namespace, name)
+	if err != nil {
+		fmt.Printf("error %s\n", err.Error())
+		return
+	}
+	// Get Token
+	token := GetToken(secret)
+
+	// Set Auth Header
+	newHeader := SettingAuthHeader(&http.Header{}, token.Access.Token.ID)
+
+	// update list
+	urlGetInstance := baseUrl + secret.TenantId + "/servers/detail"
+	newResponse, err := ListHandleFunc(urlGetInstance, *newHeader)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//servers := &model.ServerInfo{}
+	newBytes, err := ioutil.ReadAll(newResponse.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer newResponse.Body.Close()
+	servers := &model.InstanceList{}
+	err = json.Unmarshal(newBytes, servers)
+	var s []string
+	for _, v := range servers.Servers{
+		if strings.Split(v.Name, "-")[0] == instance.Spec.Name{
+			s = append(s, strings.Split(v.Name, "-")[0])
+		}
+	}
+
+	diff := len(s) -instance.Spec.MinCount
+	url := baseUrl + secret.TenantId + "/servers"
+	inst := &model.Instance{}
+	if diff < 0 {
+		AddToBodyInstance(inst, instance)
+		diff *= -1
+		if diff == 1{
+			inst.Server.Name = instance.Spec.Name+ fmt.Sprintf("-%d", diff + 1)
+		}else{
+			inst.Server.Name = instance.Spec.Name
+		}
+		inst.Server.MinCount = diff
+		resp, err := PostHandleFunc(url, inst, *newHeader)
+		if err != nil {
+			fmt.Println(err)
+		}
+		_, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer resp.Body.Close()
+	}else if diff > 0 {
+		var serverIds []string
+		for _, v := range servers.Servers{
+			if strings.Split(v.Name, "-")[0] == instance.Spec.Name{
+				serverIds = append(serverIds, v.ID)
+			}
+		}
+		serverIds = serverIds[:diff]
+		for _, v := range serverIds{
+			urlDeleteInstance := baseUrl + secret.TenantId + "/servers/" + v
+			resp, err := DeleteHandleFunc(urlDeleteInstance, *newHeader)
+			if err != nil {
+				fmt.Println(err)
+			}
+			resp.Body.Close()
+		}
+	}
+
 }
 
 func ValidateInstance(client kubernetes.Interface, instance *v1beta1.Instance, namespace, name string) {
